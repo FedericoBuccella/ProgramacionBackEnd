@@ -33,6 +33,7 @@ function MensajesRender(messageArr) {
 
 formMessage.addEventListener('submit', event =>{
     event.preventDefault()
+    messageInput.value = ""
 
     sendMessage()
 })
