@@ -33,9 +33,8 @@ function MensajesRender(messageArr) {
 
 formMessage.addEventListener('submit', event =>{
     event.preventDefault()
-    messageInput.value = ""
-
     sendMessage()
+    messageInput.value = ""
 })
 
 socket.on('server: message', MensajesRender)
