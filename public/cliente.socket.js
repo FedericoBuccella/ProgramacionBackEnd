@@ -9,6 +9,7 @@ const titleInput = document.querySelector('#title')
 const priceInput = document.querySelector('#price')
 const thumbnailInput = document.querySelector('#thumbnail')
 const tablaProd = document.querySelector('#tablaProd')
+const empty = document.querySelector('#empty')
 
 
 function sendMessage() {
@@ -29,7 +30,7 @@ function MensajesRender(messageArr) {
     try{
         const hbs = messageArr.map(text =>{
             return(`<div>
-                        <span>${text.email} ${year}</span>
+                        <span>${text.email} ${year}:</span>
                         <em>${text.message}</em>
                     </div>`)
         }).join(" ");
@@ -58,20 +59,22 @@ function sendProduct() {
     }
 }
 
-function ProductRender(productArr) {
-  
+async function ProductRender(productsArr) {
     try{
-            const hbs = productArr.map(prod =>{
-                return(`<td>${prod.title}</td>
-                        <td>${prod.price}</td>
-                        <td><img src="${prod.thumbnail}" alt="Foto"></td>`)
-            }).join(" ");
-
-            tablaProd.innerHTML = hbs
-        }catch(err){
+        
+        const response = await fetch('/plantilla.hbs')
+        
+        const plantilla = await response.text()
+        
+        productsArr.forEach(prod => {
+            const template = Handlebars.compile(plantilla)
+            const hbsProd = template(prod) 
+            tablaProd.innerHTML = hbsProd
+        }); 
+    }catch(err){
             console.log(`Ha ocurrido un error ${err}`)
-        }
     }
+}
 
 formProduct.addEventListener('submit', event =>{
     event.preventDefault()
