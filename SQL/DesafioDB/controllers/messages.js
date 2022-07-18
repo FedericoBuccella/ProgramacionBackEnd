@@ -1,47 +1,46 @@
-import __dirname from "../utils.js";
-import knex from "knex";
-import {configSqlite} from "../MariaDB-Sqlite3/config.js";
-
-export class messages{
+class messages{
     constructor(config, table){
-        this.table = table;
-        this.config = config;
+        try{
+            this.table = table;
+            this.config = config;
 
-        knex(this.config).schema.hasTable(this.table).then(exists => {
-            if (!exists) {
-                return knex(this.config).schema.createTable(this.table, table => {
-                    table.increments('id').notNullable().primary();
-                    table.string('email', 70).notNullable();
-                    table.string('message').notNullable();
-                    table.string('date', 50).notNullable();
-                  });
-            }
-        }).catch(err => console.log("error en constructor", err))
-    }
-
-    async addMessage(data){
-        try {
-            const date = new Date().toLocaleString();
-            data.date = date;
-    
-            await knex(this.config)(this.table).insert(data);
-        } catch (error) {
-            console.log("error al añadir mensaje", error);
-        } finally{
-            knex(this.config).destroy();
+            config.schema.hasTable(table).then(exists => {
+                if (!exists) {
+                    return config.schema.createTable(table, tab => {
+                        tab.increments('id').notNullable().primary();
+                        tab.string('email', 70).notNullable();
+                        tab.string('date', 50);
+                        tab.string('message').notNullable();
+                    });
+                }
+            })}catch(err){
+                console.log(err)
+            } 
         }
-    }
 
-    async getMessages(){
-        try {
-            const data = await knex(this.config).from(this.table).select('*');
-            return data; 
-        } catch (error) {
-            console.log("error al obtener mensajes", error);
-        } finally{
-            knex(this.config).destroy();
+        async addMessage( email, message ){
+
+            const date = new Date().toLocaleString()
+
+            const datos = {
+                email,
+                date,
+                message
+            } 
+
+            const messages= await this.config.from(this.table).insert(datos)
+
+            return messages 
         }
-    }
+
+        async getMessages(){
+
+            let rows= await this.config.from(this.table).select("*")
+
+            rows.forEach((article)=>{ console.log(`${article['id']} ${article['email']} ${article['date']}: ${article['message']}`) })
+
+            return rows
+        }
 }
 
-export default new messages(configSqlite, 'message');
+module.exports = messages

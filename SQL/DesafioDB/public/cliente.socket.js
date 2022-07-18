@@ -59,8 +59,7 @@ function sendProduct() {
 }
 
 async function ProductRender(productArr) {
-  
-    try{
+   
         document.querySelector('#tableEmpty').innerHTML="" 
         const plantilla = await fetch('/plantilla.hbs')
         const plantillaText = await plantilla.text()
@@ -75,9 +74,7 @@ async function ProductRender(productArr) {
             }else{
                 document.querySelector('#tableEmpty').innerHTML = ("<h4>No hay ningun producto :(</h4>")
             }
-        }catch(err){
-            console.log(`Ha ocurrido un error ${err}`)
-        }
+        
     }
 
 formProduct.addEventListener('submit', event =>{

@@ -1,43 +1,43 @@
-import knex from 'knex' 
-import {configMariaDB} from '../MariaDB-Sqlite3/config.js';
-
-class products {
+class products{
     constructor(config, table){
-        this.table = table;
-        this.config = config;
+        try{
+            this.table = table;
+            this.config = config;
+            config.schema.hasTable(table).then(exists => {
+                if (!exists) {
+                    return config.schema.createTable(table, tab => {
+                        tab.increments('id').notNullable().primary();
+                        tab.string('title', 100).notNullable();
+                        tab.string('thumbnail').notNullable();
+                        tab.float('price').notNullable();
+                    })
+                }})
+        }catch(err){
+                console.log(err)
+        }
+    }
+        
+        async getAll (){
 
-        knex(this.config).schema.hasTable(this.table).then(exists => {
-            if (!exists) {
-                return knex(this.config).schema.createTable(this.table, table => {
-                    table.increments('id').notNullable().primary();
-                    table.string('title', 100).notNullable();
-                    table.string('thumbnail').notNullable();
-                    table.float('price').notNullable();
-                  });
+            let rows= await this.config.from(this.table).select("*")
+            
+            rows.forEach((article)=>{ console.log(`${article['id']}`)})
+            
+            return rows
+        }
+
+        async add ( title, price, thumbnail){
+
+            const datos = {
+                title,
+                price,
+                thumbnail,
             }
-        }).catch(err => console.log("error en constructor", err))
-    }
 
-    async getAll (){
-        try {
-            const products = await knex(this.config).from(this.table).select('*');
-            return {products};
-        } catch (error) {
-            console.log("error al obtener productos", error);
-        } finally{
-            knex(this.config).destroy();
+            const product= await this.config.from(this.table).insert(datos)
+
+            return product
         }
     }
 
-    async add (product){
-        try {
-            await knex(this.config)(this.table).insert(product);
-        } catch (error) {
-            console.log("error al crear producto", error);
-        } finally{
-            knex(this.config).destroy();
-        }
-    }
-}
-
-export default new products(configMariaDB, 'product');
+module.exports = products
